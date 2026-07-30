@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Kas</title>
+<title>Dashboard Kas — Piodalan Nadi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -24,22 +24,6 @@
     --shadow: 0 2px 10px rgba(42,36,32,.06), 0 1px 2px rgba(42,36,32,.08);
     --radius: 12px;
   }
-  body {
-      font-family: Arial, sans-serif;
-      background-image: url("bg.jpg");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0;
-      padding: 20px;
-  }
-
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -54,7 +38,17 @@
   .wrap{max-width:1080px;margin:0 auto;}
 
   /* ---- Header ---- */
-  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+  header{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
+  .header-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;width:100%;}
+  .sheet-link{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'Public Sans',sans-serif; font-weight:600; font-size:12.5px;
+    color:var(--maroon); text-decoration:none; border:1px solid var(--maroon);
+    padding:9px 14px; border-radius:9px; background:#fff; white-space:nowrap;
+    transition:background .15s,color .15s; box-shadow:var(--shadow);
+  }
+  .sheet-link:hover{background:var(--maroon); color:#fff;}
+  .sheet-link svg{width:14px;height:14px;flex-shrink:0;}
   .eyebrow{
     font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.14em;
     text-transform:uppercase; color:var(--maroon); font-weight:600; margin:0 0 6px;
@@ -179,18 +173,62 @@
 
   footer{text-align:center; font-size:11px; color:var(--ink-soft); margin-top:30px; font-family:'IBM Plex Mono',monospace;}
 
+  /* ---- Tablet ---- */
+  @media (max-width:860px){
+    body{padding:20px 14px 50px;}
+    .cards{grid-template-columns:1fr 1fr;}
+    .cards .card:last-child{grid-column:span 2;}
+  }
+
+  /* ---- Mobile ---- */
   @media (max-width:640px){
+    body{padding:16px 10px 44px;}
+    .header-top{align-items:center; justify-content:center; text-align:center; gap:14px;}
+    .header-top > div:first-child{width:100%;}
+    h1{font-size:24px;}
+    .subdate{font-size:12px;}
+    .seal{width:88px;height:88px;}
+    .seal .amt{font-size:13px;}
+    .sheet-link{width:100%; justify-content:center;}
+
     .cards{grid-template-columns:1fr;}
+    .cards .card:last-child{grid-column:auto;}
+    .card{padding:14px 16px;}
+    .card .v{font-size:19px;}
+
+    .toolbar{flex-direction:column; align-items:stretch;}
+    .toolbar input[type=text], .toolbar select{width:100%;}
+    .toolbar .btn{width:100%;}
+
     thead{display:none;}
     table, tbody, tr, td{display:block; width:100%;}
-    tbody tr{border-bottom:1px solid var(--paper-line); padding:10px 14px;}
-    tbody td{border:none; padding:3px 0; display:flex; justify-content:space-between; gap:10px;}
-    tbody td::before{content:attr(data-label); font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; color:var(--ink-soft); flex-shrink:0;}
+    .ledger{border-radius:14px;}
+    tbody tr{border-bottom:8px solid var(--paper); padding:12px 14px; background:#fff;}
+    tbody tr:hover{background:#fff;}
+    tbody td{border:none; padding:5px 0; display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:13.5px;}
+    tbody td::before{content:attr(data-label); font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase; color:var(--ink-soft); flex-shrink:0; letter-spacing:.06em;}
+    td[data-label="Keterangan"]{align-items:flex-start;}
+    td[data-label="Kriteria"]{align-items:flex-start; text-align:right;}
     .num{text-align:right;}
-    .actions{justify-content:flex-end;}
-    header{align-items:center;}
-    .seal{width:80px;height:80px;}
-    .seal .amt{font-size:12px;}
+    .actions{justify-content:flex-end; padding-top:8px; margin-top:4px; border-top:1px dashed var(--paper-line);}
+    .actions::before{content:none;}
+    .btn-icon{font-size:17px; padding:8px 12px; min-width:40px; min-height:40px;}
+
+    .modal{padding:20px 16px; border-radius:12px; max-width:none; width:100%;}
+    .row2{flex-direction:column; gap:0;}
+    .modal-actions{flex-direction:column-reverse;}
+    .modal-actions .btn{padding:12px 16px;}
+    .field input, .field select{padding:11px 12px; font-size:15px;} /* 15px+ avoids iOS zoom-on-focus */
+    .toolbar input[type=text]{font-size:15px;}
+  }
+
+  /* ---- Small phones ---- */
+  @media (max-width:380px){
+    h1{font-size:21px;}
+    .seal{width:76px;height:76px;}
+    .seal .lbl{font-size:7.5px;}
+    .seal .amt{font-size:11px;}
+    .eyebrow{font-size:10px;}
   }
 </style>
 </head>
@@ -198,15 +236,21 @@
 <div class="wrap">
 
   <header>
-    <div>
-      <p class="eyebrow">Buku Kas Digital</p>
-      <h1>Piodalan<em>lan Karya</em></h1>
-      <p class="subdate">Pura Dalem Gede Dalem Jawa · Desa Adat Singapadu · 13 Januari 2026</p>
+    <div class="header-top">
+      <div>
+        <p class="eyebrow">Buku Kas Digital</p>
+        <h1>Piodalan Nadi <em>lan Melaspas</em></h1>
+        <p class="subdate">Pura Dalem Gede Dalem Jawa · Desa Adat Singapadu · 13 Januari 2026</p>
+      </div>
+      <div class="seal">
+        <span class="lbl">Saldo Akhir</span>
+        <span class="amt" id="sealSaldo">Rp 0</span>
+      </div>
     </div>
-    <div class="seal">
-      <span class="lbl">Saldo Akhir</span>
-      <span class="amt" id="sealSaldo">Rp 0</span>
-    </div>
+    <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/15rTmSzr83YEhFGD0N4YT3gRGVROwW7j5ISjPkQSIGcY/edit?gid=1357716813#gid=1357716813" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 11h2"/></svg>
+      Tinjau Sumber Data di Google Sheets
+    </a>
   </header>
 
   <section class="cards">
@@ -306,7 +350,7 @@
 </div>
 
 <script>
- 
+  // ====== GANTI dengan URL Web App Apps Script kamu (deploy sebagai Web App) ======
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYWiTHKPoYfQiPL8yVA_hniJTi-Mvx3UGUpPV9YE0AzwyT5mATA7PLs3ff4ILosxY/exec";
 
   let allRows = [];
