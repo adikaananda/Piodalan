@@ -3,9 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Input Transaksi — Piodalan Nadi</title>
+<title>Dashboard Kas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; }
+  :root{
+    --paper:#FBF7EC;
+    --paper-line:#E7DEC8;
+    --ink:#2A2420;
+    --ink-soft:#6B6156;
+    --maroon:#7A2E22;
+    --maroon-deep:#5A2018;
+    --gold:#C9A24B;
+    --gold-soft:#EADFB8;
+    --green:#3F7A4E;
+    --green-soft:#E4EFE2;
+    --red:#B34437;
+    --red-soft:#F6E6E1;
+    --card:#FFFFFF;
+    --shadow: 0 2px 10px rgba(42,36,32,.06), 0 1px 2px rgba(42,36,32,.08);
+    --radius: 12px;
+  }
   body {
       font-family: Arial, sans-serif;
       background-image: url("bg.jpg");
@@ -21,179 +39,487 @@
       margin: 0;
       padding: 20px;
   }
-  .card {
-    background: #fff; width: 100%; max-width: 420px;
-    border-radius: 14px; padding: 28px 26px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Public Sans', Arial, sans-serif;
+    color:var(--ink);
+    background:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 27px, var(--paper-line) 28px),
+      var(--paper);
+    min-height:100vh;
+    padding: 28px 20px 60px;
   }
-  h1 { font-size: 18px; margin: 0 0 2px; color: #1c1c1c; }
-  p.sub { font-size: 12px; color: #777; margin: 0 0 20px; }
-  label { display: block; font-size: 12px; font-weight: bold; color: #444; margin: 14px 0 5px; }
-  input, select {
-    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
-    font-size: 14px; background: #fafafa;
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  /* ---- Header ---- */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--maroon); font-weight:600; margin:0 0 6px;
   }
-  input:focus, select:focus { outline: none; border-color: #4A86E8; background: #fff; }
-  .row { display: flex; gap: 10px; }
-  .row > div { flex: 1; }
-  button {
-    width: 100%; margin-top: 22px; padding: 13px; border: none; border-radius: 8px;
-    background: #4A86E8; color: #fff; font-size: 15px; font-weight: bold; cursor: pointer;
-    transition: background .15s;
+  h1{
+    font-family:'Fraunces', serif; font-weight:600; font-size:30px; line-height:1.1;
+    margin:0; color:var(--ink); letter-spacing:-.01em;
   }
-  button:hover { background: #3a6fce; }
-  button:disabled { background: #a9c2f0; cursor: not-allowed; }
-  #msg { margin-top: 14px; font-size: 13px; text-align: center; min-height: 18px; }
-  #msg.ok { color: #1a7f37; }
-  #msg.err { color: #c00; }
-  .brand { text-align: center; margin-bottom: 14px; }
-  .brand span {
-    display: inline-block; background: #eef3ff; color: #4A86E8;
-    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;
+  h1 em{font-style:italic; color:var(--maroon); font-weight:400;}
+  .subdate{font-size:13px; color:var(--ink-soft); margin-top:6px;}
+
+  .seal{
+    width:104px;height:104px;border-radius:50%;
+    border:2px solid var(--maroon);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background: radial-gradient(circle at 50% 40%, #fff, var(--gold-soft) 120%);
+    position:relative; flex-shrink:0;
+    box-shadow: var(--shadow);
+  }
+  .seal::before{
+    content:"";position:absolute; inset:6px; border:1px dashed var(--gold);
+    border-radius:50%;
+  }
+  .seal .lbl{font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.1em; color:var(--maroon-deep); text-transform:uppercase;}
+  .seal .amt{font-family:'Fraunces',serif; font-weight:700; font-size:15px; color:var(--maroon-deep); margin-top:2px; text-align:center; line-height:1.1; padding:0 6px;}
+
+  /* ---- Summary cards ---- */
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px;}
+  .card{
+    background:var(--card); border-radius:var(--radius); padding:16px 18px;
+    box-shadow:var(--shadow); border-left:4px solid var(--gold);
+  }
+  .card.debet{border-left-color:var(--green);}
+  .card.kredit{border-left-color:var(--red);}
+  .card .k{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft);}
+  .card .v{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin-top:4px;}
+  .card.debet .v{color:var(--green);}
+  .card.kredit .v{color:var(--red);}
+  .card .n{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+
+  /* ---- Toolbar ---- */
+  .toolbar{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;
+  }
+  .toolbar input[type=text], .toolbar select{
+    font-family:'Public Sans',sans-serif; font-size:13.5px;
+    padding:9px 12px; border:1px solid var(--paper-line); border-radius:9px;
+    background:#fff; color:var(--ink);
+  }
+  .toolbar input[type=text]{flex:1; min-width:160px;}
+  .btn{
+    font-family:'Public Sans',sans-serif; font-weight:600; font-size:13.5px;
+    padding:10px 16px; border-radius:9px; border:none; cursor:pointer;
+    transition:transform .1s, box-shadow .15s; white-space:nowrap;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-primary{background:var(--maroon); color:#fff;}
+  .btn-primary:hover{background:var(--maroon-deep);}
+  .btn-ghost{background:transparent; color:var(--maroon); border:1px solid var(--maroon);}
+  .btn-ghost:hover{background:var(--maroon); color:#fff;}
+  .btn-icon{background:none; border:none; cursor:pointer; padding:4px 6px; border-radius:6px; font-size:14px;}
+  .btn-icon.edit{color:var(--maroon);}
+  .btn-icon.del{color:var(--red);}
+  .btn-icon:hover{background:var(--paper-line);}
+
+  /* ---- Table (ledger) ---- */
+  .ledger{
+    background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+    overflow:hidden; margin-bottom:20px;
+  }
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead th{
+    text-align:left; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft);
+    padding:12px 14px; border-bottom:2px solid var(--maroon); background:#FFFDF8;
+  }
+  tbody td{padding:11px 14px; border-bottom:1px solid var(--paper-line); vertical-align:top;}
+  tbody tr:hover{background:#FBF3E0;}
+  tbody tr:last-child td{border-bottom:none;}
+  .num{font-family:'IBM Plex Mono',monospace; text-align:right; white-space:nowrap;}
+  .num.debet{color:var(--green);}
+  .num.kredit{color:var(--red);}
+  .num.saldo{color:var(--maroon-deep); font-weight:600;}
+  .tag{
+    display:inline-block; font-size:10.5px; padding:2px 8px; border-radius:20px;
+    background:var(--gold-soft); color:var(--maroon-deep); font-weight:600;
+  }
+  .sub-txt{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+  .actions{white-space:nowrap;}
+  .empty, .loading, .errbox{padding:40px 20px; text-align:center; color:var(--ink-soft); font-size:14px;}
+  .errbox{color:var(--red);}
+
+  /* ---- Modal ---- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(42,36,32,.45); display:none;
+    align-items:center; justify-content:center; padding:20px; z-index:50;
+  }
+  .overlay.open{display:flex;}
+  .modal{
+    background:var(--paper); border-radius:14px; width:100%; max-width:440px;
+    padding:26px 24px; box-shadow:0 20px 50px rgba(0,0,0,.3); max-height:90vh; overflow-y:auto;
+  }
+  .modal h2{font-family:'Fraunces',serif; font-size:19px; margin:0 0 4px; color:var(--ink);}
+  .modal .modal-sub{font-size:12px; color:var(--ink-soft); margin-bottom:16px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; text-transform:uppercase; letter-spacing:.04em;}
+  .field input, .field select{
+    width:100%; padding:9px 11px; border:1px solid var(--paper-line); border-radius:8px;
+    font-size:13.5px; background:#fff; font-family:'Public Sans',sans-serif; color:var(--ink);
+  }
+  .field input:focus, .field select:focus{outline:none; border-color:var(--maroon);}
+  .row2{display:flex; gap:10px;}
+  .row2 > .field{flex:1;}
+  .modal-actions{display:flex; gap:10px; margin-top:18px;}
+  .modal-actions .btn{flex:1;}
+  .modal-msg{font-size:12.5px; margin-top:10px; min-height:16px;}
+  .modal-msg.err{color:var(--red);}
+  .modal-msg.ok{color:var(--green);}
+
+  .confirm-box{text-align:center;}
+  .confirm-box p{font-size:13.5px; color:var(--ink-soft); margin:8px 0 0;}
+
+  footer{text-align:center; font-size:11px; color:var(--ink-soft); margin-top:30px; font-family:'IBM Plex Mono',monospace;}
+
+  @media (max-width:640px){
+    .cards{grid-template-columns:1fr;}
+    thead{display:none;}
+    table, tbody, tr, td{display:block; width:100%;}
+    tbody tr{border-bottom:1px solid var(--paper-line); padding:10px 14px;}
+    tbody td{border:none; padding:3px 0; display:flex; justify-content:space-between; gap:10px;}
+    tbody td::before{content:attr(data-label); font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; color:var(--ink-soft); flex-shrink:0;}
+    .num{text-align:right;}
+    .actions{justify-content:flex-end;}
+    header{align-items:center;}
+    .seal{width:80px;height:80px;}
+    .seal .amt{font-size:12px;}
   }
 </style>
 </head>
 <body>
-  <div class="card">
-    <div class="brand"><span>PIODALAN NADI 13 JANUARI 2026</span></div>
-    <h1>Input Transaksi</h1>
-    <p class="sub">Isi data lalu klik Simpan. Data langsung masuk ke Google Sheets.</p>
+<div class="wrap">
 
-    <label>Tanggal</label>
-    <input type="date" id="tanggal" required>
+  <header>
+    <div>
+      <p class="eyebrow">Buku Kas Digital</p>
+      <h1>Piodalan<em>lan Karya</em></h1>
+      <p class="subdate">Pura Dalem Gede Dalem Jawa · Desa Adat Singapadu · 13 Januari 2026</p>
+    </div>
+    <div class="seal">
+      <span class="lbl">Saldo Akhir</span>
+      <span class="amt" id="sealSaldo">Rp 0</span>
+    </div>
+  </header>
 
-    <label>Keterangan</label>
-    <input type="text" id="keterangan" placeholder="Contoh: Beli janur, sesari pejati, dll" required>
+  <section class="cards">
+    <div class="card debet">
+      <div class="k">Total Debet (Masuk)</div>
+      <div class="v" id="cardDebet">Rp 0</div>
+    </div>
+    <div class="card kredit">
+      <div class="k">Total Kredit (Keluar)</div>
+      <div class="v" id="cardKredit">Rp 0</div>
+    </div>
+    <div class="card">
+      <div class="k">Jumlah Transaksi</div>
+      <div class="v" id="cardCount">0</div>
+      <div class="n" id="cardNote">tercatat di buku kas</div>
+    </div>
+  </section>
 
-    <label>Kriteria</label>
-    <select id="kriteria" onchange="updateSub()"></select>
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Cari keterangan…">
+    <select id="filterKriteria"><option value="">Semua kriteria</option></select>
+    <button class="btn btn-ghost" id="refreshBtn">Muat Ulang</button>
+    <button class="btn btn-primary" id="addBtn">+ Tambah Transaksi</button>
+  </div>
 
-    <label>Sub Kriteria</label>
-    <select id="subKriteria"><option value="">(tidak ada)</option></select>
+  <div class="ledger">
+    <table>
+      <thead>
+        <tr>
+          <th>No</th><th>Tanggal</th><th>Keterangan</th><th>Kriteria</th>
+          <th style="text-align:right">Debet</th><th style="text-align:right">Kredit</th>
+          <th style="text-align:right">Saldo</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="8" class="loading">Memuat data dari Google Sheets…</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-    <div class="row">
-      <div>
+  <footer>Tersambung langsung ke Google Sheets · perubahan otomatis tersimpan &amp; saldo dihitung ulang</footer>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <h2 id="formTitle">Tambah Transaksi</h2>
+    <p class="modal-sub">Isi data lalu simpan. Saldo otomatis dihitung ulang.</p>
+
+    <input type="hidden" id="fRow">
+    <div class="field">
+      <label>Tanggal</label>
+      <input type="date" id="fTanggal">
+    </div>
+    <div class="field">
+      <label>Keterangan</label>
+      <input type="text" id="fKeterangan" placeholder="Contoh: Beli janur, sesari pejati, dll">
+    </div>
+    <div class="field">
+      <label>Kriteria</label>
+      <select id="fKriteria"></select>
+    </div>
+    <div class="field">
+      <label>Sub Kriteria</label>
+      <select id="fSub"><option value="">(tidak ada)</option></select>
+    </div>
+    <div class="row2">
+      <div class="field">
         <label>Debet (Rp)</label>
-        <input type="number" id="debet" min="0" step="1" placeholder="0">
+        <input type="number" id="fDebet" min="0" step="1" placeholder="0">
       </div>
-      <div>
+      <div class="field">
         <label>Kredit (Rp)</label>
-        <input type="number" id="kredit" min="0" step="1" placeholder="0">
+        <input type="number" id="fKredit" min="0" step="1" placeholder="0">
       </div>
     </div>
 
-    <button id="btn" onclick="submitForm()">SIMPAN TRANSAKSI</button>
-    <div id="msg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="formCancel">Batal</button>
+      <button class="btn btn-primary" id="formSave">Simpan</button>
+    </div>
+    <div class="modal-msg" id="formMsg"></div>
   </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="overlay" id="delOverlay">
+  <div class="modal confirm-box">
+    <h2>Hapus transaksi ini?</h2>
+    <p id="delDetail"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="delCancel">Batal</button>
+      <button class="btn btn-primary" id="delConfirm" style="background:var(--red)">Ya, Hapus</button>
+    </div>
+    <div class="modal-msg" id="delMsg"></div>
+  </div>
+</div>
 
 <script>
-  
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSJeNPlFqpfC0vZ8HcrtL64QpM1Qh8iM1HhZ9ufJKTP0M-rbdLUqR75HnQwYrTE08/exec";
-  
+ 
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYWiTHKPoYfQiPL8yVA_hniJTi-Mvx3UGUpPV9YE0AzwyT5mATA7PLs3ff4ILosxY/exec";
 
-  const KMAP = {
-    "KAS PETENGEN / DANA BKK": ["DANA BKK", "LAINNYA"],
-    "PEMEDALAN KRAMA": ["PEMEDALAN KRAMA SISI KANGIN","PEMEDALAN KRAMA SISI TENGAH","PEMEDALAN KRAMA SISI KAUH","LAINNYA"],
-    "PRABYA SESARI": ["SESARI PEWEDAN","SESARI PEKARYAN","SESARI PEJATI","SESARI CANANG","SESARI CANANG PUNIA","LAINNYA"],
-    "ULAM/EBAT": ["NASI/KEBASA/BAHAN PEMBANTU","BEBEK","BAWI","LAINNYA"],
-    "UPAKARA": ["BANGKIT","PEREMAN","SIBAKAN","SUCI","SAJI","LAINNYA"],
-    "JINAH KAS HARIAN": [],
-    "PEMEDALAN JINAH KRAMA SISI KANGIN": [],
-    "PEMEDALAN JINAH KRAMA SISI TENGAH": [],
-    "PEMEDALAN JINAH KRAMA SISI KAUH": [],
-    "JINAH PAH PAHAN SESARI": [],
-    "JINAH PUNIA": [],
-    "JINAH NGERANJING LIANAN/PENDAPATAN LAIN-LAIN": [],
-    "PRABYA PUNIA/MULE-MULE": [],
-    "KONSUMSI LAN PERANTENAN": [],
-    "PRABYA HARIAN": [],
-    "PRABYA SESARI PENGENTOS PUNIA": [],
-    "PRABYA PEKEMITAN": [],
-    "PERLENGKAPAN LAN PERALATAN": [],
-    "PUNIA DAGANG": [],
-    "PRABYA KESENIAN/DEKORASI": [],
-    "JINAH SEKSI PENGALIAN DANA": [],
-    "JINAH LELANG PEKARI": [],
-    "JINAH PEKARI PIODALAN SEPEN": [],
-    "PRABYA KEAMANAN LAN KEBERSIHAN": [],
-    "PRABYA TRANSPORTASI": []
-  };
+  let allRows = [];
+  let kriteriaMap = {};
+  let deleteTarget = null;
 
-  const kSelect = document.getElementById('kriteria');
-  Object.keys(KMAP).forEach(k => {
-    const opt = document.createElement('option');
-    opt.value = k; opt.textContent = k;
-    kSelect.appendChild(opt);
-  });
+  const rupiah = n => 'Rp ' + Number(n || 0).toLocaleString('id-ID');
 
-  function updateSub() {
-    const subSelect = document.getElementById('subKriteria');
-    subSelect.innerHTML = '';
-    const subs = KMAP[kSelect.value] || [];
-    if (subs.length === 0) {
-      subSelect.innerHTML = '<option value="">(tidak ada)</option>';
+  function el(id){ return document.getElementById(id); }
+
+  // ---------- Load data ----------
+  async function loadData() {
+    el('tbody').innerHTML = '<tr><td colspan="8" class="loading">Memuat data dari Google Sheets…</td></tr>';
+    try {
+      const res = await fetch(SCRIPT_URL + '?action=list');
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'Gagal memuat data');
+      allRows = json.data || [];
+      kriteriaMap = json.kriteria || {};
+      populateKriteriaOptions();
+      renderSummary(json.summary || {});
+      renderTable();
+    } catch (err) {
+      el('tbody').innerHTML = '<tr><td colspan="8" class="errbox">Gagal terhubung ke Google Sheets: ' + err.message + '</td></tr>';
+    }
+  }
+
+  function populateKriteriaOptions() {
+    const keys = Object.keys(kriteriaMap);
+    // filter dropdown
+    const fSel = el('filterKriteria');
+    fSel.innerHTML = '<option value="">Semua kriteria</option>' +
+      keys.map(k => '<option value="' + k + '">' + k + '</option>').join('');
+    // form dropdown
+    const formSel = el('fKriteria');
+    formSel.innerHTML = keys.map(k => '<option value="' + k + '">' + k + '</option>').join('');
+    updateSubOptions();
+  }
+
+  function updateSubOptions() {
+    const subs = kriteriaMap[el('fKriteria').value] || [];
+    const subSel = el('fSub');
+    if (!subs.length) {
+      subSel.innerHTML = '<option value="">(tidak ada)</option>';
       return;
     }
-    subs.forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s; opt.textContent = s;
-      subSelect.appendChild(opt);
+    subSel.innerHTML = subs.map(s => '<option value="' + s + '">' + s + '</option>').join('');
+  }
+  el('fKriteria').addEventListener('change', updateSubOptions);
+
+  function renderSummary(s) {
+    el('sealSaldo').textContent = rupiah(s.saldoAkhir);
+    el('cardDebet').textContent = rupiah(s.totalDebet);
+    el('cardKredit').textContent = rupiah(s.totalKredit);
+    el('cardCount').textContent = s.jumlahTransaksi || 0;
+  }
+
+  function renderTable() {
+    const q = el('search').value.trim().toLowerCase();
+    const kf = el('filterKriteria').value;
+    const filtered = allRows.filter(r => {
+      const matchQ = !q || (r.keterangan || '').toLowerCase().includes(q);
+      const matchK = !kf || r.kriteria === kf;
+      return matchQ && matchK;
     });
-  }
-  updateSub();
 
-  function showMsg(text, ok) {
-    const el = document.getElementById('msg');
-    el.textContent = text;
-    el.className = ok ? 'ok' : 'err';
-  }
-
-  async function submitForm() {
-    if (SCRIPT_URL.includes("PASTE_WEB_APP_URL_DI_SINI")) {
-      showMsg('SCRIPT_URL belum diisi. Buka index.html, ganti dengan URL Web App Apps Script.', false);
+    if (!filtered.length) {
+      el('tbody').innerHTML = '<tr><td colspan="8" class="empty">Belum ada transaksi yang cocok. Klik "+ Tambah Transaksi" untuk mulai mencatat.</td></tr>';
       return;
     }
-    const data = {
-      tanggal: document.getElementById('tanggal').value,
-      keterangan: document.getElementById('keterangan').value,
-      kriteria: document.getElementById('kriteria').value,
-      subKriteria: document.getElementById('subKriteria').value,
-      debet: document.getElementById('debet').value,
-      kredit: document.getElementById('kredit').value
+
+    el('tbody').innerHTML = filtered.map(r => `
+      <tr>
+        <td data-label="No">${r.no}</td>
+        <td data-label="Tanggal">${formatTanggal(r.tanggal)}</td>
+        <td data-label="Keterangan">${escapeHtml(r.keterangan)}</td>
+        <td data-label="Kriteria">
+          <span class="tag">${escapeHtml(r.kriteria || '-')}</span>
+          ${r.subKriteria ? '<div class="sub-txt">' + escapeHtml(r.subKriteria) + '</div>' : ''}
+        </td>
+        <td data-label="Debet" class="num debet">${r.debet ? rupiah(r.debet) : '—'}</td>
+        <td data-label="Kredit" class="num kredit">${r.kredit ? rupiah(r.kredit) : '—'}</td>
+        <td data-label="Saldo" class="num saldo">${rupiah(r.saldo)}</td>
+        <td data-label="Aksi" class="actions">
+          <button class="btn-icon edit" onclick="openEdit(${r.row})" title="Edit">✎</button>
+          <button class="btn-icon del" onclick="openDelete(${r.row})" title="Hapus">🗑</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function formatTanggal(d) {
+    if (!d) return '-';
+    const parts = String(d).split('-');
+    if (parts.length !== 3) return d;
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  el('search').addEventListener('input', renderTable);
+  el('filterKriteria').addEventListener('change', renderTable);
+  el('refreshBtn').addEventListener('click', loadData);
+
+  // ---------- Add / Edit form ----------
+  function openAdd() {
+    el('formTitle').textContent = 'Tambah Transaksi';
+    el('fRow').value = '';
+    el('fTanggal').value = new Date().toISOString().slice(0,10);
+    el('fKeterangan').value = '';
+    el('fKriteria').selectedIndex = 0;
+    updateSubOptions();
+    el('fDebet').value = '';
+    el('fKredit').value = '';
+    el('formMsg').textContent = '';
+    el('formOverlay').classList.add('open');
+  }
+  el('addBtn').addEventListener('click', openAdd);
+
+  function openEdit(row) {
+    const r = allRows.find(x => x.row === row);
+    if (!r) return;
+    el('formTitle').textContent = 'Edit Transaksi #' + r.no;
+    el('fRow').value = r.row;
+    el('fTanggal').value = r.tanggal;
+    el('fKeterangan').value = r.keterangan;
+    el('fKriteria').value = r.kriteria;
+    updateSubOptions();
+    el('fSub').value = r.subKriteria || '';
+    el('fDebet').value = r.debet || '';
+    el('fKredit').value = r.kredit || '';
+    el('formMsg').textContent = '';
+    el('formOverlay').classList.add('open');
+  }
+
+  function closeForm() { el('formOverlay').classList.remove('open'); }
+  el('formCancel').addEventListener('click', closeForm);
+  el('formOverlay').addEventListener('click', e => { if (e.target === el('formOverlay')) closeForm(); });
+
+  el('formSave').addEventListener('click', async () => {
+    const row = el('fRow').value;
+    const payload = {
+      action: row ? 'update' : 'create',
+      row: row || undefined,
+      tanggal: el('fTanggal').value,
+      keterangan: el('fKeterangan').value,
+      kriteria: el('fKriteria').value,
+      subKriteria: el('fSub').value,
+      debet: el('fDebet').value,
+      kredit: el('fKredit').value
     };
-    if (!data.tanggal || !data.keterangan) {
-      showMsg('Tanggal dan Keterangan wajib diisi.', false);
+    if (!payload.tanggal || !payload.keterangan) {
+      el('formMsg').textContent = 'Tanggal dan Keterangan wajib diisi.';
+      el('formMsg').className = 'modal-msg err';
       return;
     }
-    const btn = document.getElementById('btn');
-    btn.disabled = true;
-    btn.textContent = 'Menyimpan...';
-    showMsg('', true);
-
+    const btn = el('formSave');
+    btn.disabled = true; btn.textContent = 'Menyimpan…';
     try {
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
-        // text/plain dipakai supaya browser tidak mengirim preflight OPTIONS
-        // (Apps Script Web App tidak selalu menangani preflight dengan baik)
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       });
       const json = await res.json();
-      if (json.ok) {
-        showMsg('Tersimpan di baris ' + json.row + ' (NO TRS ' + json.noTrs + ', saldo Rp' + Number(json.saldo).toLocaleString('id-ID') + ')', true);
-        document.getElementById('keterangan').value = '';
-        document.getElementById('debet').value = '';
-        document.getElementById('kredit').value = '';
-      } else {
-        showMsg('Gagal: ' + json.error, false);
-      }
+      if (!json.ok) throw new Error(json.error || 'Gagal menyimpan');
+      closeForm();
+      await loadData();
     } catch (err) {
-      showMsg('Gagal terhubung ke server: ' + err.message, false);
+      el('formMsg').textContent = 'Gagal: ' + err.message;
+      el('formMsg').className = 'modal-msg err';
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'SIMPAN TRANSAKSI';
+      btn.disabled = false; btn.textContent = 'Simpan';
     }
+  });
+
+  // ---------- Delete ----------
+  function openDelete(row) {
+    const r = allRows.find(x => x.row === row);
+    if (!r) return;
+    deleteTarget = row;
+    el('delDetail').textContent = '#' + r.no + ' — ' + r.keterangan + ' (' + formatTanggal(r.tanggal) + ')';
+    el('delMsg').textContent = '';
+    el('delOverlay').classList.add('open');
   }
+  function closeDelete() { el('delOverlay').classList.remove('open'); deleteTarget = null; }
+  el('delCancel').addEventListener('click', closeDelete);
+  el('delOverlay').addEventListener('click', e => { if (e.target === el('delOverlay')) closeDelete(); });
+
+  el('delConfirm').addEventListener('click', async () => {
+    if (!deleteTarget) return;
+    const btn = el('delConfirm');
+    btn.disabled = true; btn.textContent = 'Menghapus…';
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'delete', row: deleteTarget })
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'Gagal menghapus');
+      closeDelete();
+      await loadData();
+    } catch (err) {
+      el('delMsg').textContent = 'Gagal: ' + err.message;
+      el('delMsg').className = 'modal-msg err';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Ya, Hapus';
+    }
+  });
+
+  loadData();
 </script>
 </body>
 </html>
