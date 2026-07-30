@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Input Transaksi Piodalan Nadi</title>
+<style>
+  * { box-sizing: border-box; }
+ body {
+    font-family: Arial, sans-serif;
+    background-image: url("bg.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 20px;
+}
+  .card {
+    background: #fff; width: 100%; max-width: 420px;
+    border-radius: 14px; padding: 28px 26px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  }
+  h1 { font-size: 18px; margin: 0 0 2px; color: #1c1c1c; }
+  p.sub { font-size: 12px; color: #777; margin: 0 0 20px; }
+  label { display: block; font-size: 12px; font-weight: bold; color: #444; margin: 14px 0 5px; }
+  input, select {
+    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
+    font-size: 14px; background: #fafafa;
+  }
+  input:focus, select:focus { outline: none; border-color: #4A86E8; background: #fff; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  button {
+    width: 100%; margin-top: 22px; padding: 13px; border: none; border-radius: 8px;
+    background: #4A86E8; color: #fff; font-size: 15px; font-weight: bold; cursor: pointer;
+    transition: background .15s;
+  }
+  button:hover { background: #3a6fce; }
+  button:disabled { background: #a9c2f0; cursor: not-allowed; }
+  #msg { margin-top: 14px; font-size: 13px; text-align: center; min-height: 18px; }
+  #msg.ok { color: #1a7f37; }
+  #msg.err { color: #c00; }
+  .brand { text-align: center; margin-bottom: 14px; }
+  .brand span {
+    display: inline-block; background: #eef3ff; color: #4A86E8;
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand"><span>PIODALAN NADI 13 JANUARI 2026</span></div>
+    <h1>Input Transaksi</h1>
+    <p class="sub">Isi data lalu klik Simpan. Data langsung masuk ke Google Sheets.</p>
+
+    <label>Tanggal</label>
+    <input type="date" id="tanggal" required>
+
+    <label>Keterangan</label>
+    <input type="text" id="keterangan" placeholder="Contoh: Beli janur, sesari pejati, dll" required>
+
+    <label>Kriteria</label>
+    <select id="kriteria" onchange="updateSub()"></select>
+
+    <label>Sub Kriteria</label>
+    <select id="subKriteria"><option value="">(tidak ada)</option></select>
+
+    <div class="row">
+      <div>
+        <label>Debet (Rp)</label>
+        <input type="number" id="debet" min="0" step="1" placeholder="0">
+      </div>
+      <div>
+        <label>Kredit (Rp)</label>
+        <input type="number" id="kredit" min="0" step="1" placeholder="0">
+      </div>
+    </div>
+
+    <button id="btn" onclick="submitForm()">SIMPAN TRANSAKSI</button>
+    <div id="msg"></div>
+  </div>
+
+<script>
+  // ======== GANTI URL INI dengan Web App URL dari Apps Script (Deploy > New deployment) ========
+  const SCRIPT_URL = "https://script.google.com/a/macros/mail.ugm.ac.id/s/AKfycbzxOagDlb8A5C-lZrVoLwYDpJGpM_D6FEAOCuVUsey9bXjtuVQIwTtun8_ZacDQJMBq/exec";
+
+  const KMAP = {
+    "KAS PETENGEN / DANA BKK": ["DANA BKK"],
+    "PEMEDALAN KRAMA": ["PEMEDALAN KRAMA SISI KANGIN","PEMEDALAN KRAMA SISI TENGAH","PEMEDALAN KRAMA SISI KAUH"],
+    "PRABYA SESARI": ["SESARI PEWEDAN","SESARI PEKARYAN","SESARI PEJATI","SESARI CANANG","SESARI CANANG PUNIA"],
+    "ULAM/EBAT": ["NASI/KEBASA/BAHAN PEMBANTU","BEBEK","BAWI"],
+    "UPAKARA": ["BANGKIT","PEREMAN","SIBAKAN","SUCI","SAJI"],
+    "JINAH KAS HARIAN": [],
+    "PEMEDALAN JINAH KRAMA SISI KANGIN": [],
+    "PEMEDALAN JINAH KRAMA SISI TENGAH": [],
+    "PEMEDALAN JINAH KRAMA SISI KAUH": [],
+    "JINAH PAH PAHAN SESARI": [],
+    "JINAH PUNIA": [],
+    "JINAH NGERANJING LIANAN/PENDAPATAN LAIN-LAIN": [],
+    "PRABYA PUNIA/MULE-MULE": [],
+    "KONSUMSI LAN PERANTENAN": [],
+    "PRABYA HARIAN": [],
+    "PRABYA SESARI PENGENTOS PUNIA": [],
+    "PRABYA PEKEMITAN": [],
+    "PERLENGKAPAN LAN PERALATAN": [],
+    "PUNIA DAGANG": [],
+    "PRABYA KESENIAN/DEKORASI": [],
+    "JINAH SEKSI PENGALIAN DANA": [],
+    "JINAH LELANG PEKARI": [],
+    "JINAH PEKARI PIODALAN SEPEN": [],
+    "PRABYA KEAMANAN LAN KEBERSIHAN": [],
+    "PRABYA TRANSPORTASI": []
+  };
+
+  const kSelect = document.getElementById('kriteria');
+  Object.keys(KMAP).forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k; opt.textContent = k;
+    kSelect.appendChild(opt);
+  });
+
+  function updateSub() {
+    const subSelect = document.getElementById('subKriteria');
+    subSelect.innerHTML = '';
+    const subs = KMAP[kSelect.value] || [];
+    if (subs.length === 0) {
+      subSelect.innerHTML = '<option value="">(tidak ada)</option>';
+      return;
+    }
+    subs.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      subSelect.appendChild(opt);
+    });
+  }
+  updateSub();
+
+  function showMsg(text, ok) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = ok ? 'ok' : 'err';
+  }
+
+  async function submitForm() {
+    if (SCRIPT_URL.includes("PASTE_WEB_APP_URL_DI_SINI")) {
+      showMsg('SCRIPT_URL belum diisi. Buka index.html, ganti dengan URL Web App Apps Script.', false);
+      return;
+    }
+    const data = {
+      tanggal: document.getElementById('tanggal').value,
+      keterangan: document.getElementById('keterangan').value,
+      kriteria: document.getElementById('kriteria').value,
+      subKriteria: document.getElementById('subKriteria').value,
+      debet: document.getElementById('debet').value,
+      kredit: document.getElementById('kredit').value
+    };
+    if (!data.tanggal || !data.keterangan) {
+      showMsg('Tanggal dan Keterangan wajib diisi.', false);
+      return;
+    }
+    const btn = document.getElementById('btn');
+    btn.disabled = true;
+    btn.textContent = 'Menyimpan...';
+    showMsg('', true);
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      if (json.ok) {
+        showMsg('Tersimpan di baris ' + json.row + ' (NO TRS ' + json.noTrs + ', saldo Rp' + Number(json.saldo).toLocaleString('id-ID') + ')', true);
+        document.getElementById('keterangan').value = '';
+        document.getElementById('debet').value = '';
+        document.getElementById('kredit').value = '';
+      } else {
+        showMsg('Gagal: ' + json.error, false);
+      }
+    } catch (err) {
+      showMsg('Gagal terhubung ke server: ' + err.message, false);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'SIMPAN TRANSAKSI';
+    }
+  }
+</script>
+</body>
+</html>
