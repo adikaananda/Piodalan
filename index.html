@@ -13,7 +13,6 @@
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -87,7 +86,7 @@
   </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFwR7BuxqowEv0X7CF9tHBYzumftJceUzqAv5IXLCDLruyuxJeqnzCR8yC-cPKwUU/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT9B5KvB_OBEobohiI-aOHOVg1wDUhFnfHCYBrO5UHTnoxELWCwCGFgtDeGBVraBQ/exec";
 
  const KMAP = {
   "KAS PETENGEN / DANA BKK": ["DANA BKK", "PETENGEN"],
@@ -144,28 +143,6 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyFwR7BuxqowEv0X7CF9
     const el = document.getElementById('msg');
     el.textContent = text;
     el.className = ok ? 'ok' : 'err';
-  }
-
-  function submitViaJsonp(data) {
-    return new Promise((resolve, reject) => {
-      const callbackName = 'cb_' + Date.now();
-      const script = document.createElement('script');
-
-      window[callbackName] = function (response) {
-        resolve(response);
-        delete window[callbackName];
-        script.remove();
-      };
-
-      const params = new URLSearchParams({ ...data, callback: callbackName });
-      script.src = SCRIPT_URL + '?' + params.toString();
-      script.onerror = function () {
-        reject(new Error('Gagal memuat script dari server'));
-        delete window[callbackName];
-        script.remove();
-      };
-      document.body.appendChild(script);
-    });
   }
 
   async function submitForm() {
