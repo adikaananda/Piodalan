@@ -87,8 +87,9 @@
   </div>
 
 <script>
- 
-  const SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnRWca_4-mrgaO4MnfoO7LN-aBjcaFIGQcFU4jSkEiu7Z5kjQQTRBsfzzaeUkmr47DAHPEsXcSsmtB1Q-yESr62Az6Q_VIVpDOyranCH-_yrYWR6yYB71NhKlq8cFuH9hLUJndwHwli0LGxozX1jg189Ue0zBFsL8BU0WyYMwaLK4oPtT4bMQ7gagpa7MY_yK0pFWlNel8wY33DovFtfXYMbAN29v2cp4LkacnnMIN88YghaqTewmKR7jnBSZSXSL1B4tJ6gK_HisYFk6AE&lib=M7C1bZMK_lHfn4z5ri64fnSEO0RKOEkQv";
+
+  // URL Web App Apps Script yang benar (format /exec, bukan /echo)
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw67G5ehPB-tsleqQP-2Wfcv406fvmZxbIbcXOMAApwDuPTbvtTkYcaudk1fqBaM48/exec";
 
   const KMAP = {
     "KAS PETENGEN / DANA BKK": ["DANA BKK"],
@@ -148,10 +149,6 @@
   }
 
   async function submitForm() {
-    if (SCRIPT_URL.includes("PASTE_WEB_APP_URL_DI_SINI")) {
-      showMsg('SCRIPT_URL belum diisi. Buka index.html, ganti dengan URL Web App Apps Script.', false);
-      return;
-    }
     const data = {
       tanggal: document.getElementById('tanggal').value,
       keterangan: document.getElementById('keterangan').value,
@@ -164,25 +161,48 @@
       showMsg('Tanggal dan Keterangan wajib diisi.', false);
       return;
     }
+    if (!data.kriteria) {
+      showMsg('Kriteria wajib dipilih.', false);
+      return;
+    }
+    if (!data.debet && !data.kredit) {
+      showMsg('Isi salah satu: Debet atau Kredit.', false);
+      return;
+    }
+
     const btn = document.getElementById('btn');
     btn.disabled = true;
     btn.textContent = 'Menyimpan...';
     showMsg('', true);
 
     try {
+      // Gunakan text/plain agar tidak memicu preflight CORS (Apps Script tidak mendukung OPTIONS)
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        redirect: 'follow'
       });
-      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+      }
+
+      const text = await res.text();
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch (parseErr) {
+        throw new Error('Respon server tidak valid: ' + text.slice(0, 120));
+      }
+
       if (json.ok) {
         showMsg('Tersimpan di baris ' + json.row + ' (NO TRS ' + json.noTrs + ', saldo Rp' + Number(json.saldo).toLocaleString('id-ID') + ')', true);
         document.getElementById('keterangan').value = '';
         document.getElementById('debet').value = '';
         document.getElementById('kredit').value = '';
       } else {
-        showMsg('Gagal: ' + json.error, false);
+        showMsg('Gagal: ' + (json.error || 'tidak diketahui'), false);
       }
     } catch (err) {
       showMsg('Gagal terhubung ke server: ' + err.message, false);
