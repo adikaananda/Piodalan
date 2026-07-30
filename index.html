@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Input Transaksi Piodalan Nadi</title>
+<title>Input Transaksi — Piodalan Nadi</title>
 <style>
   * { box-sizing: border-box; }
- body {
-    font-family: Arial, sans-serif;
-    background-image: url("bg.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+  body {
+      font-family: Arial, sans-serif;
+      background-image: url("bg.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
 
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    padding: 20px;
-}
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+  }
   .card {
     background: #fff; width: 100%; max-width: 420px;
     border-radius: 14px; padding: 28px 26px;
@@ -87,9 +87,9 @@
   </div>
 
 <script>
-
-  // URL Web App Apps Script yang benar (format /exec, bukan /echo)
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw67G5ehPB-tsleqQP-2Wfcv406fvmZxbIbcXOMAApwDuPTbvtTkYcaudk1fqBaM48/exec";
+  // ======== GANTI URL INI dengan Web App URL dari Apps Script (Deploy > New deployment) ========
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFVJumlFjyEyDJmS9vfoVMira7kHn7TqX6zS4OHPlRfpynNMNwLWuCbs0b4B7Yat1-/exec";
+  // contoh: "https://script.google.com/macros/s/AKfycbXXXXXXXXXXXXXXXXXXXXXX/exec"
 
   const KMAP = {
     "KAS PETENGEN / DANA BKK": ["DANA BKK"],
@@ -149,6 +149,10 @@
   }
 
   async function submitForm() {
+    if (SCRIPT_URL.includes("PASTE_WEB_APP_URL_DI_SINI")) {
+      showMsg('SCRIPT_URL belum diisi. Buka index.html, ganti dengan URL Web App Apps Script.', false);
+      return;
+    }
     const data = {
       tanggal: document.getElementById('tanggal').value,
       keterangan: document.getElementById('keterangan').value,
@@ -161,48 +165,27 @@
       showMsg('Tanggal dan Keterangan wajib diisi.', false);
       return;
     }
-    if (!data.kriteria) {
-      showMsg('Kriteria wajib dipilih.', false);
-      return;
-    }
-    if (!data.debet && !data.kredit) {
-      showMsg('Isi salah satu: Debet atau Kredit.', false);
-      return;
-    }
-
     const btn = document.getElementById('btn');
     btn.disabled = true;
     btn.textContent = 'Menyimpan...';
     showMsg('', true);
 
     try {
-      // Gunakan text/plain agar tidak memicu preflight CORS (Apps Script tidak mendukung OPTIONS)
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
+        // text/plain dipakai supaya browser tidak mengirim preflight OPTIONS
+        // (Apps Script Web App tidak selalu menangani preflight dengan baik)
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(data),
-        redirect: 'follow'
+        body: JSON.stringify(data)
       });
-
-      if (!res.ok) {
-        throw new Error('HTTP ' + res.status);
-      }
-
-      const text = await res.text();
-      let json;
-      try {
-        json = JSON.parse(text);
-      } catch (parseErr) {
-        throw new Error('Respon server tidak valid: ' + text.slice(0, 120));
-      }
-
+      const json = await res.json();
       if (json.ok) {
         showMsg('Tersimpan di baris ' + json.row + ' (NO TRS ' + json.noTrs + ', saldo Rp' + Number(json.saldo).toLocaleString('id-ID') + ')', true);
         document.getElementById('keterangan').value = '';
         document.getElementById('debet').value = '';
         document.getElementById('kredit').value = '';
       } else {
-        showMsg('Gagal: ' + (json.error || 'tidak diketahui'), false);
+        showMsg('Gagal: ' + json.error, false);
       }
     } catch (err) {
       showMsg('Gagal terhubung ke server: ' + err.message, false);
