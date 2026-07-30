@@ -90,42 +90,11 @@
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYOrfK7YDXYaDc4hes0_xiasr8k-KPUsNZKh6mtS6FT7A85Q5w9SerpmdMFqPAJ4Y/exec";
 
  const KMAP = {
-  "KAS PETENGEN / DANA BKK": [
-    "DANA BKK",
-    "PETENGEN"
-  ],
-
-  "PEMEDALAN KRAMA": [
-    "PEMEDALAN KRAMA SISI KANGIN",
-    "PEMEDALAN KRAMA SISI TENGAH",
-    "PEMEDALAN KRAMA SISI KAUH"
-  ],
-
-  "PRABYA SESARI": [
-    "SESARI PEWEDAN",
-    "SESARI PEKARYAN",
-    "SESARI PEJATI",
-    "SESARI CANANG",
-    "SESARI CANANG PUNIA",
-    "LAIN-LAIN"
-  ],
-
-  "ULAM/EBAT": [
-    "NASI/KEBASA/BAHAN PEMBANTU",
-    "BEBEK",
-    "BAWI",
-    "LAIN-LAIN"
-  ],
-
-  "UPAKARA": [
-    "BANGKIT",
-    "PEREMAN",
-    "SIBAKAN",
-    "SUCI",
-    "SAJI",
-    "LAIN-LAIN"
-  ],
-
+  "KAS PETENGEN / DANA BKK": ["DANA BKK", "PETENGEN"],
+  "PEMEDALAN KRAMA": ["PEMEDALAN KRAMA SISI KANGIN", "PEMEDALAN KRAMA SISI TENGAH", "PEMEDALAN KRAMA SISI KAUH"],
+  "PRABYA SESARI": ["SESARI PEWEDAN", "SESARI PEKARYAN", "SESARI PEJATI", "SESARI CANANG", "SESARI CANANG PUNIA", "LAIN-LAIN"],
+  "ULAM/EBAT": ["NASI/KEBASA/BAHAN PEMBANTU", "BEBEK", "BAWI", "LAIN-LAIN"],
+  "UPAKARA": ["BANGKIT", "PEREMAN", "SIBAKAN", "SUCI", "SAJI", "LAIN-LAIN"],
   "JINAH KAS HARIAN": [],
   "PEMEDALAN JINAH KRAMA SISI KANGIN": [],
   "PEMEDALAN JINAH KRAMA SISI TENGAH": [],
@@ -147,6 +116,7 @@
   "PRABYA KEAMANAN LAN KEBERSIHAN": [],
   "PRABYA TRANSPORTASI": []
 };
+
   const kSelect = document.getElementById('kriteria');
   Object.keys(KMAP).forEach(k => {
     const opt = document.createElement('option');
@@ -177,10 +147,6 @@
   }
 
   async function submitForm() {
-    if (SCRIPT_URL.includes("PASTE_WEB_APP_URL_DI_SINI")) {
-      showMsg('SCRIPT_URL belum diisi. Buka index.html, ganti dengan URL Web App Apps Script.', false);
-      return;
-    }
     const data = {
       tanggal: document.getElementById('tanggal').value,
       keterangan: document.getElementById('keterangan').value,
@@ -201,7 +167,7 @@
     try {
       const res = await fetch(SCRIPT_URL, {
         method: 'POST',
- 
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(data)
       });
       const json = await res.json();
@@ -221,5 +187,3 @@
     }
   }
 </script>
-</body>
-</html>
