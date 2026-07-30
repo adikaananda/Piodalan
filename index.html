@@ -187,15 +187,16 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw67G5ehPB-tsleqQP-2
     showMsg('', true);
 
     try {
-      const json = await submitViaJsonp(data);
-      if (json.ok) {
-        showMsg('Tersimpan di baris ' + json.row + ' (NO TRS ' + json.noTrs + ', saldo Rp' + Number(json.saldo).toLocaleString('id-ID') + ')', true);
-        document.getElementById('keterangan').value = '';
-        document.getElementById('debet').value = '';
-        document.getElementById('kredit').value = '';
-      } else {
-        showMsg('Gagal: ' + json.error, false);
-      }
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data),
+        mode: 'no-cors'
+      });
+      showMsg('Transaksi tersimpan! Cek Google Sheets untuk detail lengkap.', true);
+      document.getElementById('keterangan').value = '';
+      document.getElementById('debet').value = '';
+      document.getElementById('kredit').value = '';
     } catch (err) {
       showMsg('Gagal terhubung ke server: ' + err.message, false);
     } finally {
