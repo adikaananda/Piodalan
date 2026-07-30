@@ -13,6 +13,7 @@
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
+
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -86,35 +87,36 @@
   </div>
 
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT9B5KvB_OBEobohiI-aOHOVg1wDUhFnfHCYBrO5UHTnoxELWCwCGFgtDeGBVraBQ/exec";
+ 
+  const SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnRWca_4-mrgaO4MnfoO7LN-aBjcaFIGQcFU4jSkEiu7Z5kjQQTRBsfzzaeUkmr47DAHPEsXcSsmtB1Q-yESr62Az6Q_VIVpDOyranCH-_yrYWR6yYB71NhKlq8cFuH9hLUJndwHwli0LGxozX1jg189Ue0zBFsL8BU0WyYMwaLK4oPtT4bMQ7gagpa7MY_yK0pFWlNel8wY33DovFtfXYMbAN29v2cp4LkacnnMIN88YghaqTewmKR7jnBSZSXSL1B4tJ6gK_HisYFk6AE&lib=M7C1bZMK_lHfn4z5ri64fnSEO0RKOEkQv";
 
- const KMAP = {
-  "KAS PETENGEN / DANA BKK": ["DANA BKK", "PETENGEN"],
-  "PEMEDALAN KRAMA": ["PEMEDALAN KRAMA SISI KANGIN", "PEMEDALAN KRAMA SISI TENGAH", "PEMEDALAN KRAMA SISI KAUH"],
-  "PRABYA SESARI": ["SESARI PEWEDAN", "SESARI PEKARYAN", "SESARI PEJATI", "SESARI CANANG", "SESARI CANANG PUNIA", "LAIN-LAIN"],
-  "ULAM/EBAT": ["NASI/KEBASA/BAHAN PEMBANTU", "BEBEK", "BAWI", "LAIN-LAIN"],
-  "UPAKARA": ["BANGKIT", "PEREMAN", "SIBAKAN", "SUCI", "SAJI", "LAIN-LAIN"],
-  "JINAH KAS HARIAN": [],
-  "PEMEDALAN JINAH KRAMA SISI KANGIN": [],
-  "PEMEDALAN JINAH KRAMA SISI TENGAH": [],
-  "PEMEDALAN JINAH KRAMA SISI KAUH": [],
-  "JINAH PAH PAHAN SESARI": [],
-  "JINAH PUNIA": [],
-  "JINAH NGERANJING LIANAN/PENDAPATAN LAIN-LAIN": [],
-  "PRABYA PUNIA/MULE-MULE": [],
-  "KONSUMSI LAN PERANTENAN": [],
-  "PRABYA HARIAN": [],
-  "PRABYA SESARI PENGENTOS PUNIA": [],
-  "PRABYA PEKEMITAN": [],
-  "PERLENGKAPAN LAN PERALATAN": [],
-  "PUNIA DAGANG": [],
-  "PRABYA KESENIAN/DEKORASI": [],
-  "JINAH SEKSI PENGALIAN DANA": [],
-  "JINAH LELANG PEKARI": [],
-  "JINAH PEKARI PIODALAN SEPEN": [],
-  "PRABYA KEAMANAN LAN KEBERSIHAN": [],
-  "PRABYA TRANSPORTASI": []
-};
+  const KMAP = {
+    "KAS PETENGEN / DANA BKK": ["DANA BKK"],
+    "PEMEDALAN KRAMA": ["PEMEDALAN KRAMA SISI KANGIN","PEMEDALAN KRAMA SISI TENGAH","PEMEDALAN KRAMA SISI KAUH"],
+    "PRABYA SESARI": ["SESARI PEWEDAN","SESARI PEKARYAN","SESARI PEJATI","SESARI CANANG","SESARI CANANG PUNIA"],
+    "ULAM/EBAT": ["NASI/KEBASA/BAHAN PEMBANTU","BEBEK","BAWI"],
+    "UPAKARA": ["BANGKIT","PEREMAN","SIBAKAN","SUCI","SAJI"],
+    "JINAH KAS HARIAN": [],
+    "PEMEDALAN JINAH KRAMA SISI KANGIN": [],
+    "PEMEDALAN JINAH KRAMA SISI TENGAH": [],
+    "PEMEDALAN JINAH KRAMA SISI KAUH": [],
+    "JINAH PAH PAHAN SESARI": [],
+    "JINAH PUNIA": [],
+    "JINAH NGERANJING LIANAN/PENDAPATAN LAIN-LAIN": [],
+    "PRABYA PUNIA/MULE-MULE": [],
+    "KONSUMSI LAN PERANTENAN": [],
+    "PRABYA HARIAN": [],
+    "PRABYA SESARI PENGENTOS PUNIA": [],
+    "PRABYA PEKEMITAN": [],
+    "PERLENGKAPAN LAN PERALATAN": [],
+    "PUNIA DAGANG": [],
+    "PRABYA KESENIAN/DEKORASI": [],
+    "JINAH SEKSI PENGALIAN DANA": [],
+    "JINAH LELANG PEKARI": [],
+    "JINAH PEKARI PIODALAN SEPEN": [],
+    "PRABYA KEAMANAN LAN KEBERSIHAN": [],
+    "PRABYA TRANSPORTASI": []
+  };
 
   const kSelect = document.getElementById('kriteria');
   Object.keys(KMAP).forEach(k => {
@@ -146,6 +148,10 @@
   }
 
   async function submitForm() {
+    if (SCRIPT_URL.includes("PASTE_WEB_APP_URL_DI_SINI")) {
+      showMsg('SCRIPT_URL belum diisi. Buka index.html, ganti dengan URL Web App Apps Script.', false);
+      return;
+    }
     const data = {
       tanggal: document.getElementById('tanggal').value,
       keterangan: document.getElementById('keterangan').value,
@@ -164,16 +170,20 @@
     showMsg('', true);
 
     try {
-      await fetch(SCRIPT_URL, {
+      const res = await fetch(SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(data),
-        mode: 'no-cors'
+        body: JSON.stringify(data)
       });
-      showMsg('Transaksi tersimpan! Cek Google Sheets untuk detail lengkap.', true);
-      document.getElementById('keterangan').value = '';
-      document.getElementById('debet').value = '';
-      document.getElementById('kredit').value = '';
+      const json = await res.json();
+      if (json.ok) {
+        showMsg('Tersimpan di baris ' + json.row + ' (NO TRS ' + json.noTrs + ', saldo Rp' + Number(json.saldo).toLocaleString('id-ID') + ')', true);
+        document.getElementById('keterangan').value = '';
+        document.getElementById('debet').value = '';
+        document.getElementById('kredit').value = '';
+      } else {
+        showMsg('Gagal: ' + json.error, false);
+      }
     } catch (err) {
       showMsg('Gagal terhubung ke server: ' + err.message, false);
     } finally {
